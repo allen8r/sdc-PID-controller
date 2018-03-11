@@ -1,5 +1,6 @@
 #include <uWS/uWS.h>
 #include <iostream>
+#include <iomanip>
 #include "json.hpp"
 #include "PID.h"
 #include <math.h>
@@ -33,13 +34,42 @@ int main(int argc, char* argv[])
   uWS::Hub h;
 
   PID pid;
+
   // Initialize the pid variable.
-  double init_Kp = atof(argv[1]);
-  double init_Ki = atof(argv[2]);
-  double init_Kd = atof(argv[3]);
+  double init_Kp = 0.120;
+  double init_Ki = 0.000;
+  double init_Kd = 0.950;
+  //[0.065, 0.0, 0.9] is getting the car around the track with very slight weaving; some drifting over
+  //  the right lane line on sharp left turns.
+  //[0.12, 0.0, 0.95]: fairly smooth; stays on track without going over lane lines; some oscilating behavior
+  //  negotiating sharp turns
+
+  if (argc >= 4) {
+    init_Kp = atof(argv[1]);
+    init_Ki = atof(argv[2]);
+    init_Kd = atof(argv[3]);
+  }
+
   pid.Init(init_Kp, init_Ki, init_Kd);
 
-  h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+  double throttle = 0.300;
+  if (argc >= 5) {
+    throttle = atof(argv[4]);
+  }
+
+  std::cout << std::fixed << std::setprecision(3);
+  std::cout << "=======================================" << std::endl;
+  std::cout << "  Initializing Parameters:             " << std::endl;
+  std::cout << "  ------------------------             " << std::endl;
+  std::cout << "    Kp = " << init_Kp << std::endl;
+  std::cout << "    Ki = " << init_Ki << std::endl;
+  std::cout << "    Kd = " << init_Kd << std::endl;
+  std::cout << "  ------------------------             " << std::endl << std::endl;
+  std::cout << "  throttle = " << throttle << std::endl;
+  std::cout << "=======================================" << std::endl << std::endl;
+
+
+  h.onMessage([&pid, &throttle](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -56,7 +86,7 @@ int main(int argc, char* argv[])
           double angle = std::stod(j[1]["steering_angle"].get<std::string>());
           double steer_value;
           /*
-          * TODO: Calcuate steering value here, remember the steering value is
+          * Calcuate steering value here, remember the steering value is
           * [-1, 1].
           * NOTE: Feel free to play around with the throttle and speed. Maybe use
           * another PID controller to control the speed!
@@ -69,7 +99,7 @@ int main(int argc, char* argv[])
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = 0.3;
+          msgJson["throttle"] = throttle;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
           std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
