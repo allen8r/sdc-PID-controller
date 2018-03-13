@@ -57,16 +57,16 @@ int main(int argc, char* argv[])
     throttle = atof(argv[4]);
   }
 
-  std::cout << std::fixed << std::setprecision(3);
-  std::cout << "=======================================" << std::endl;
-  std::cout << "  Initializing Parameters:             " << std::endl;
-  std::cout << "  ------------------------             " << std::endl;
+  std::cout << std::fixed << std::setprecision(4);
+  std::cout << "============================================" << std::endl;
+  std::cout << "  Initializing Hyperparameters:             " << std::endl;
+  std::cout << "  -----------------------------             " << std::endl;
   std::cout << "    Kp = " << init_Kp << std::endl;
   std::cout << "    Ki = " << init_Ki << std::endl;
   std::cout << "    Kd = " << init_Kd << std::endl;
-  std::cout << "  ------------------------             " << std::endl << std::endl;
+  std::cout << "  -----------------------------             " << std::endl << std::endl;
   std::cout << "  throttle = " << throttle << std::endl;
-  std::cout << "=======================================" << std::endl << std::endl;
+  std::cout << "============================================" << std::endl << std::endl;
 
 
   h.onMessage([&pid, &throttle](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
